@@ -58,12 +58,27 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     session: {
-        strategy: "database",
+        strategy: "jwt",
     },
     callbacks: {
-        async session({ session, user }) {
-            if (session?.user) {
-                (session.user as any).id = user.id;
+        async jwt({ token, user, account }) {
+            // Initial sign in - user object is available
+            if (user) {
+                token.id = user.id;
+                token.email = user.email;
+                token.name = user.name;
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (session?.user && token) {
+                session.user.id = token.id as string;
+                if (token.email) {
+                    session.user.email = token.email as string;
+                }
+                if (token.name) {
+                    session.user.name = token.name as string;
+                }
             }
             return session;
         }
