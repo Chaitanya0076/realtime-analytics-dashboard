@@ -4,10 +4,29 @@ import prisma from "@/lib/prisma";
 
 const MAX_DOMAINS_PER_USER = 5;
 
-function validateDomainName(name: string) {
-    const trimmedName = name.trim().toLowerCase();
-    const domainRegex = /^[a-z0-9.-]+\.[a-z]{2,}$/;
-    return domainRegex.test(trimmedName);
+function normalizeDomain(domain: string): string {
+    const trimmedDomain = domain.trim().toLowerCase();
+    // Remove protocol (http://, https://)
+    let normalized = trimmedDomain.replace(/^https?:\/\//, "");
+    // Remove www. prefix
+    normalized = normalized.replace(/^www\./, "");
+    // Remove trailing slashes
+    normalized = normalized.replace(/\/+$/, "");
+    // Remove any path after domain
+    normalized = normalized.split('/')[0];
+    // Final trim to ensure no leading/trailing spaces
+    return normalized.trim();
+}
+
+function validateDomainName(name: string): boolean {
+    // Allow localhost for development/testing
+    if (name === "localhost" || name.startsWith("localhost:")) {
+        return true;
+    }
+    
+    // Standard domain validation: must have at least one dot and valid TLD
+    const domainRegex = /^[a-z0-9]([a-z0-9.-]*[a-z0-9])?(\.[a-z]{2,})+$/;
+    return domainRegex.test(name);
 }
 
 export async function GET(){
@@ -40,7 +59,14 @@ export async function POST(req: Request) {
             return NextResponse.json({error: "Domain name is required"}, {status: 400});
         }
 
-        const normalizedDomainName = name.trim().toLowerCase();
+        // Normalize the domain first (remove https://, www., etc.)
+        const normalizedDomainName = normalizeDomain(name);
+        
+        if(normalizedDomainName.length === 0){
+            return NextResponse.json({error: "Invalid domain name"}, {status: 400});
+        }
+
+        // Validate the normalized domain
         if(!validateDomainName(normalizedDomainName)){
             return NextResponse.json({error: "Invalid domain name"}, {status: 400});
         }

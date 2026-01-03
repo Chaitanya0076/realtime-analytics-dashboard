@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  redpanda:
+    image: redpandadata/redpanda:latest
+    container_name: redpanda
+    command: ["redpanda", "start", "--overprovisioned", "--smp", "1", "--memory", "1G", "--reserve-memory", "0M", "--node-id", "0", "--check=false", "--kafka-addr", "PLAINTEXT://0.0.0.0:9002", "--advertise-kafka-addr", "PLAINTEXT://localhost:9002"]
+    ports:
+      - "9002:9002"
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+  redis:
+    image: "redis:latest"
+    container_name: analytics-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  redpanda-data:

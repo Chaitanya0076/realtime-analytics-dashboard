@@ -71,6 +71,31 @@ model Domain {
   userId String
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   isActive Boolean @default(true)
+  analytics Analytics[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Analytics {
+  id String @id @default(cuid())
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  domainId String
+  bucket DateTime // normalized timestamp per bucket
+  granularity Granularity
+  path String? //null => domain-level aggregate, not specific path
+  count Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([domainId, bucket, granularity, path])
+  @@index([domainId, granularity, bucket])
+  @@index([domainId, path])
+}
+
+enum Granularity {
+  MINUTE
+  HOUR
+  DAY
+  WEEK
+  MONTH
 }
