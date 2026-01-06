@@ -1,8 +1,11 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { producer } from "@/lib/kafka";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
+
+const RATE_LIMIT_PER_MINUTE = 1000;
 
 type ClientEventPayloadV1 = {
     domain: string;
@@ -98,6 +101,17 @@ export async function POST(req: Request) {
         // v1: explicit 404; later you can switch to 204 if you don't want to leak domain existence
         return NextResponse.json({ error: 'Domain not found or inactive' }, { status: 404 });
     }
+
+    // domainRecord already fetched and validated
+    const allowed = await checkRateLimit(domainRecord.id, RATE_LIMIT_PER_MINUTE);
+
+    if (!allowed) {
+    return NextResponse.json(
+        { error: "Rate limit exceeded" },
+        { status: 429 }
+    );
+    }
+
 
     // server-enriched internal event
     const userAgent = req.headers.get("user-agent") || undefined;
