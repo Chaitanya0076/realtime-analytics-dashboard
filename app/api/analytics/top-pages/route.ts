@@ -32,7 +32,7 @@ export async function GET(req: Request) {
     where: {
       domainId,
       bucket: { gte: from },
-      path: { not: null },
+      path: { not: "" }, // exclude domain-level aggregates (empty string)
     },
     select: {
       path: true,

@@ -22,7 +22,7 @@ export async function GET() {
     _sum: { count: true },
     where: {
       domainId: { in: domains.map(d => d.id) },
-      path: null,
+      path: "", // empty string represents domain-level aggregates
     },
   });
 

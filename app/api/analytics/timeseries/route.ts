@@ -36,7 +36,7 @@ export async function GET(req: Request) {
       domainId,
       granularity,
       bucket: { gte: from },
-      path: null,
+      path: "", // empty string represents domain-level aggregates
     },
     orderBy: { bucket: "asc" },
     select: {

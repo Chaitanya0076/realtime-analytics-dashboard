@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getServerAuthSession } from "@/lib/getServerAuth";
 import prisma from "@/lib/prisma";
 import DomainsSection from "@/app/dashboard/DomainsSection";
+import OverviewHeader from "@/components/dashboard/OverviewHeader";
+
 
 
 export default async function DashboardPage() {
@@ -22,7 +24,7 @@ export default async function DashboardPage() {
   return (
     <main className="max-w-3xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-semibold mb-6">Dashboard</h1>
-
+      <OverviewHeader />
       <section>
         <h2 className="text-xl font-semibold mb-2">Your domains</h2>
         <p className="text-sm text-gray-500 mb-4">

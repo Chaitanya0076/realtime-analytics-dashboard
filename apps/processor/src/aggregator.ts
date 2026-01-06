@@ -7,7 +7,7 @@ export type AggregateUpdate = {
   domainId: string;
   granularity: "minute" | "hour";
   bucket: Date;
-  path: string | null;
+  path: string; // empty string "" for domain-level aggregates
   count: number;
 };
 
@@ -17,9 +17,9 @@ function key(
   domainId: string,
   granularity: "minute" | "hour",
   bucket: string,
-  path: string | null
+  path: string
 ) {
-  return `${domainId}|${granularity}|${bucket}|${path ?? "null"}`;
+  return `${domainId}|${granularity}|${bucket}|${path}`;
 }
 
 export function handleEvent(event: InternalEventV1) {
@@ -28,9 +28,11 @@ export function handleEvent(event: InternalEventV1) {
   const minute = toMinuteBucket(ts);
   const hour = toHourBucket(ts);
 
-  increment(event.domainId, "minute", minute, null);
-  increment(event.domainId, "hour", hour, null);
+  // Domain-level aggregates (empty string represents domain-level)
+  increment(event.domainId, "minute", minute, "");
+  increment(event.domainId, "hour", hour, "");
 
+  // Path-specific aggregates
   increment(event.domainId, "minute", minute, event.path);
   increment(event.domainId, "hour", hour, event.path);
 }
@@ -39,7 +41,7 @@ function increment(
   domainId: string,
   granularity: "minute" | "hour",
   bucketISO: string,
-  path: string | null
+  path: string
 ) {
   const k = key(domainId, granularity, bucketISO, path);
 

@@ -51,12 +51,37 @@ function isValidUrl(url: string): boolean {
     }
 }
 
+// Handle CORS preflight
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Max-Age': '86400',
+        },
+    });
+}
+
 export async function POST(req: Request) {
+    console.log("[events] Received POST request");
+    console.log("[events] Headers:", Object.fromEntries(req.headers.entries()));
+    
     let payload: ClientEventPayloadV1;
     try{
-        payload = await req.json();
-    }catch{
-        return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
+        const body = await req.text();
+        console.log("[events] Request body:", body);
+        payload = JSON.parse(body);
+        console.log("[events] Parsed payload:", payload);
+    }catch(err){
+        console.error("[events] JSON parse error:", err);
+        return NextResponse.json({ error: 'Invalid JSON payload' }, { 
+            status: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+            },
+        });
     }
 
     const { domain, path, url } = payload;
@@ -66,9 +91,16 @@ export async function POST(req: Request) {
     }
 
     const normalizedDomain = normalizeDomain(domain);
+    console.log("[events] Normalized domain:", normalizedDomain, "from:", domain);
 
     if(normalizedDomain.length === 0) {
-        return NextResponse.json({ error: 'Invalid domain' }, { status: 400 });
+        console.error("[events] Invalid domain after normalization");
+        return NextResponse.json({ error: 'Invalid domain' }, { 
+            status: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+            },
+        });
     }
 
     if(!isValidUrl(url) || url.length > 2048) {
@@ -93,14 +125,32 @@ export async function POST(req: Request) {
     }
 
     // domain lookup
+    console.log("[events] Looking up domain:", normalizedDomain);
     const domainRecord = await prisma.domain.findUnique({
         where: { name: normalizedDomain },
     });
 
-    if(!domainRecord || !domainRecord.isActive) {
-        // v1: explicit 404; later you can switch to 204 if you don't want to leak domain existence
-        return NextResponse.json({ error: 'Domain not found or inactive' }, { status: 404 });
+    if(!domainRecord) {
+        console.error("[events] Domain not found:", normalizedDomain);
+        return NextResponse.json({ error: 'Domain not found or inactive' }, { 
+            status: 404,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+            },
+        });
     }
+
+    if(!domainRecord.isActive) {
+        console.error("[events] Domain is inactive:", normalizedDomain);
+        return NextResponse.json({ error: 'Domain not found or inactive' }, { 
+            status: 404,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+            },
+        });
+    }
+
+    console.log("[events] Domain found:", domainRecord.id, domainRecord.name);
 
     // domainRecord already fetched and validated
     const allowed = await checkRateLimit(domainRecord.id, RATE_LIMIT_PER_MINUTE);
@@ -135,9 +185,11 @@ export async function POST(req: Request) {
     };
 
     try{
+        console.log("[events] Ensuring Kafka producer connection...");
         await ensureProducer();
+        console.log("[events] Producer connected, sending message to Kafka...");
     
-        await producer.send({
+        const result = await producer.send({
             topic:"page_views",
             messages:[
                 {
@@ -145,12 +197,24 @@ export async function POST(req: Request) {
                     value: JSON.stringify(internalEvent),
                 }
             ]
-        })
+        });
+        console.log("[events] Message sent to Kafka successfully:", result);
     }catch(err){
-        console.error("[events] kafka publish error:", err);
-        return NextResponse.json({ error: 'Event ingestion failed' }, { status: 500 });
+        console.error("[events] Kafka publish error:", err);
+        return NextResponse.json({ error: 'Event ingestion failed' }, { 
+            status: 500,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+            },
+        });
     }
 
     // respond with 204 No Content
-    return new NextResponse(null, { status: 204 });
+    console.log("[events] Event processed successfully, returning 204");
+    return new NextResponse(null, { 
+        status: 204,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+        },
+    });
 }

@@ -29,7 +29,7 @@ export async function GET(req: Request) {
         domainId,
         granularity: "HOUR",
         bucket: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
-        path: null,
+        path: "", // empty string represents domain-level aggregates
       },
     }),
     prisma.analytics.aggregate({
@@ -38,14 +38,14 @@ export async function GET(req: Request) {
         domainId,
         granularity: "HOUR",
         bucket: { gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) },
-        path: null,
+        path: "", // empty string represents domain-level aggregates
       },
     }),
     prisma.analytics.aggregate({
       _sum: { count: true },
       where: {
         domainId,
-        path: null,
+        path: "", // empty string represents domain-level aggregates
       },
     }),
   ]);

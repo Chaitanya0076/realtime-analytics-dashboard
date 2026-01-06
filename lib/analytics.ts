@@ -23,7 +23,7 @@ export async function getTimeSeriesForDomain(options: {
                 gte: from,
                 lte: to,
             },
-            ...(path ? { path } : {path: null}), // path-specific or domain-level
+            ...(path ? { path } : {path: ""}), // path-specific or domain-level ("" = domain-level)
         },
         orderBy: {
             bucket: 'asc',
@@ -63,7 +63,7 @@ export async function getTopPagesForDomain(options: {
         lte: to,
       },
       path: {
-        not: null,
+        not: "", // exclude domain-level aggregates (empty string)
       },
     },
     select: {
@@ -102,7 +102,7 @@ export async function getTotalViewsForDomain(options: {
         gte: from,
         lte: to,
       },
-      path: null, // domain-level aggregates
+      path: "", // domain-level aggregates (empty string)
     },
     select: {
       count: true,
