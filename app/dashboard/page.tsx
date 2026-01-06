@@ -18,5 +18,12 @@ export default async function DashboardPage() {
     orderBy: { createdAt: "desc" },
   });
 
-  return <AnalyticsDashboard initialDomains={domains} />;
+  return (
+    <AnalyticsDashboard
+      initialDomains={domains}
+      userEmail={session.user.email}
+      userName={session.user.name}
+      userImage={session.user.image}
+    />
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { TotalPageViewsSection, websiteColors } from './TotalPageViewsSection';
 import { TopPagesBarChart } from './TopPagesBarChart';
 import { WebsiteSpecificBarChart } from './WebsiteSpecificBarChart';
@@ -8,6 +8,7 @@ import { PageViewDetailChart } from './PageViewDetailChart';
 import { DomainsTable } from './DomainsTable';
 import { TimeInterval as TimeIntervalType } from './TimeIntervalSelector';
 import { BarChart3, Globe } from 'lucide-react';
+import { UserAvatar } from './UserAvatar';
 import {
   fetchOverview,
   fetchTopPages,
@@ -30,7 +31,14 @@ interface WebsitePageData {
   views: number;
 }
 
-export function AnalyticsDashboard({ initialDomains }: { initialDomains: Domain[] }) {
+interface AnalyticsDashboardProps {
+  initialDomains: Domain[];
+  userEmail?: string | null;
+  userName?: string | null;
+  userImage?: string | null;
+}
+
+export function AnalyticsDashboard({ initialDomains, userEmail, userName, userImage }: AnalyticsDashboardProps) {
   const [topPagesInterval, setTopPagesInterval] = useState<TimeIntervalType>('30mins');
   const [websiteInterval, setWebsiteInterval] = useState<TimeIntervalType>('30mins');
   const [selectedDomainId, setSelectedDomainId] = useState<string | null>(null);
@@ -259,11 +267,14 @@ export function AnalyticsDashboard({ initialDomains }: { initialDomains: Domain[
                 <p className="text-sm text-gray-500">Track your website performance</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
-              <Globe className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">
-                {activeDomainsCount} / 5 Active Domains
-              </span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
+                <Globe className="w-4 h-4 text-gray-600" />
+                <span className="text-sm font-medium text-gray-700">
+                  {activeDomainsCount} / 5 Active Domains
+                </span>
+              </div>
+              <UserAvatar email={userEmail} name={userName} image={userImage} />
             </div>
           </div>
         </div>
