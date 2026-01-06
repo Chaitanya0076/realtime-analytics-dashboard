@@ -6,6 +6,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const domainId = searchParams.get("domainId");
   const range = searchParams.get("range") || "30m";
+  const path = searchParams.get("path"); // Optional: filter by specific path
 
   if (!domainId) {
     return NextResponse.json(
@@ -31,13 +32,21 @@ export async function GET(req: Request) {
     granularity = "HOUR";
   }
 
+  // Build where clause - if path is provided, filter by it; otherwise use domain-level aggregates
+  const whereClause: {
+    domainId: string;
+    granularity: "MINUTE" | "HOUR";
+    bucket: { gte: Date };
+    path: string;
+  } = {
+    domainId,
+    granularity,
+    bucket: { gte: from },
+    path: path !== null && path !== undefined ? path : "", // empty string represents domain-level aggregates
+  };
+
   const rows = await prisma.analytics.findMany({
-    where: {
-      domainId,
-      granularity,
-      bucket: { gte: from },
-      path: "", // empty string represents domain-level aggregates
-    },
+    where: whereClause,
     orderBy: { bucket: "asc" },
     select: {
       bucket: true,
