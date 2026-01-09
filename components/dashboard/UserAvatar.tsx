@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { LogOut, ChevronDown } from 'lucide-react';
 
 interface UserAvatarProps {
@@ -15,7 +14,6 @@ interface UserAvatarProps {
 export function UserAvatar({ email, name, image }: UserAvatarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -34,8 +32,13 @@ export function UserAvatar({ email, name, image }: UserAvatarProps) {
   }, [isOpen]);
 
   const handleSignOut = async () => {
-    await signOut({ redirect: false });
-    router.push('/auth/signin');
+    // Clear session completely and redirect to signin
+    await signOut({ 
+      redirect: false,
+      callbackUrl: '/auth/signin'
+    });
+    // Force a hard navigation to ensure all session data is cleared
+    window.location.href = '/auth/signin';
   };
 
   const getInitials = () => {

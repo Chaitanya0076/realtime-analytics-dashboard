@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Plus, Trash2, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, Code } from 'lucide-react';
+import { TrackingScript } from './TrackingScript';
 
 interface Domain {
   id: string;
@@ -101,54 +102,62 @@ export function DomainsTable({
       </div>
 
       {domains.length > 0 ? (
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-gray-900">Domain</th>
-                <th className="text-left px-4 py-3 text-sm font-semibold text-gray-900">Status</th>
-                <th className="text-right px-4 py-3 text-sm font-semibold text-gray-900">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {domains.map((domain) => (
-                <tr key={domain.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 text-sm text-gray-900">{domain.name}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                        domain.isActive
-                          ? 'bg-green-100 text-green-800 border border-green-200'
-                          : 'bg-gray-100 text-gray-800 border border-gray-200'
-                      }`}
-                    >
-                      {domain.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-3">
-                      <button
-                        onClick={() => onToggleStatus(domain.id)}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors hover:underline"
-                      >
-                        {domain.isActive ? 'Deactivate' : 'Activate'}
-                      </button>
-                      <button
-                        onClick={() => onDeleteDomain(domain.id)}
-                        className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors hover:underline"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+        <>
+          <div className="border border-gray-200 rounded-lg overflow-hidden mb-6">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left px-4 py-3 text-sm font-semibold text-gray-900">Domain</th>
+                  <th className="text-left px-4 py-3 text-sm font-semibold text-gray-900">Status</th>
+                  <th className="text-right px-4 py-3 text-sm font-semibold text-gray-900">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {domains.map((domain) => (
+                  <tr key={domain.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 text-sm text-gray-900">{domain.name}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                          domain.isActive
+                            ? 'bg-green-100 text-green-800 border border-green-200'
+                            : 'bg-gray-100 text-gray-800 border border-gray-200'
+                        }`}
+                      >
+                        {domain.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-3">
+                        <button
+                          onClick={() => onToggleStatus(domain.id)}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors hover:underline"
+                        >
+                          {domain.isActive ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button
+                          onClick={() => onDeleteDomain(domain.id)}
+                          className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Tracking Script Section */}
+          <TrackingScript domain={domains.find(d => d.isActive)?.name || domains[0]?.name} />
+        </>
       ) : (
         <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
-          <p className="text-gray-500">No domains added yet. Add your first domain to get started.</p>
+          <p className="text-gray-500 mb-4">No domains added yet. Add your first domain to get started.</p>
+          <div className="mt-6">
+            <TrackingScript />
+          </div>
         </div>
       )}
     </div>

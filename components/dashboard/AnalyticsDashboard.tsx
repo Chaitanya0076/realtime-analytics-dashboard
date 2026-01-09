@@ -9,6 +9,7 @@ import { DomainsTable } from './DomainsTable';
 import { TimeInterval as TimeIntervalType } from './TimeIntervalSelector';
 import { BarChart3, Globe } from 'lucide-react';
 import { UserAvatar } from './UserAvatar';
+import { WelcomeBanner } from './WelcomeBanner';
 import {
   fetchOverview,
   fetchTopPages,
@@ -283,21 +284,28 @@ export function AnalyticsDashboard({ initialDomains, userEmail, userName, userIm
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
+          {/* Welcome Banner for New Users */}
+          {domains.length === 0 && (
+            <WelcomeBanner />
+          )}
+
           {/* Total Page Views Section */}
-          {!isLoadingOverview && (
+          {!isLoadingOverview && domains.length > 0 && (
             <TotalPageViewsSection data={overviewData} />
           )}
 
           {/* Top 10 Viewed Pages */}
-          <TopPagesBarChart
-            data={topPagesData}
-            timeInterval={topPagesInterval}
-            onTimeIntervalChange={setTopPagesInterval}
-            isLoading={isLoadingTopPages}
-          />
+          {domains.length > 0 && (
+            <TopPagesBarChart
+              data={topPagesData}
+              timeInterval={topPagesInterval}
+              onTimeIntervalChange={setTopPagesInterval}
+              isLoading={isLoadingTopPages}
+            />
+          )}
 
           {/* Website Specific Bar Chart */}
-          {selectedDomain && (
+          {selectedDomain && domains.length > 0 && (
             <WebsiteSpecificBarChart
               websiteName={selectedDomain.name}
               websites={websiteNames}
