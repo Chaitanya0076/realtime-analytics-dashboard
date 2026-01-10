@@ -39,11 +39,11 @@ export function TrackingScript({ domain }: TrackingScriptProps) {
       {/* Toggle Header */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-2 mb-4 hover:opacity-80 transition-opacity"
+        className="w-full flex items-center justify-between gap-2 mb-4 hover:opacity-80 transition-opacity cursor-pointer"
       >
         <div className="flex items-center gap-2">
           <Code className="w-5 h-5 text-gray-700" />
-          <h2 className="text-2xl font-semibold text-gray-900">Tracking Script</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 cursor-pointer">Tracking Script</h2>
         </div>
         {isOpen ? (
           <ChevronUp className="w-5 h-5 text-gray-600" />

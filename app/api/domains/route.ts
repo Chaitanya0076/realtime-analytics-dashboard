@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerAuthSession } from "@/lib/getServerAuth";
 import prisma from "@/lib/prisma";
+import { domainSchema } from "@/lib/validations";
 
 const MAX_DOMAINS_PER_USER = 5;
 
@@ -16,17 +17,6 @@ function normalizeDomain(domain: string): string {
     normalized = normalized.split('/')[0];
     // Final trim to ensure no leading/trailing spaces
     return normalized.trim();
-}
-
-function validateDomainName(name: string): boolean {
-    // Allow localhost for development/testing
-    if (name === "localhost" || name.startsWith("localhost:")) {
-        return true;
-    }
-    
-    // Standard domain validation: must have at least one dot and valid TLD
-    const domainRegex = /^[a-z0-9]([a-z0-9.-]*[a-z0-9])?(\.[a-z]{2,})+$/;
-    return domainRegex.test(name);
 }
 
 export async function GET(){
@@ -53,21 +43,32 @@ export async function POST(req: Request) {
     const userId = session.user.id;
 
     try{
-        const { name } = await req.json();
-
-        if(!name || typeof name !== "string"){
-            return NextResponse.json({error: "Domain name is required"}, {status: 400});
+        const body = await req.json();
+        
+        // Validate request body with Zod
+        const validationResult = domainSchema.safeParse(body);
+        
+        if (!validationResult.success) {
+            const errors = validationResult.error.issues.map((err) => ({
+                field: err.path.join("."),
+                message: err.message,
+            }));
+            
+            return NextResponse.json(
+                { 
+                    error: "Validation failed",
+                    details: errors 
+                },
+                { status: 400 }
+            );
         }
+
+        const { name } = validationResult.data;
 
         // Normalize the domain first (remove https://, www., etc.)
         const normalizedDomainName = normalizeDomain(name);
         
         if(normalizedDomainName.length === 0){
-            return NextResponse.json({error: "Invalid domain name"}, {status: 400});
-        }
-
-        // Validate the normalized domain
-        if(!validateDomainName(normalizedDomainName)){
             return NextResponse.json({error: "Invalid domain name"}, {status: 400});
         }
 

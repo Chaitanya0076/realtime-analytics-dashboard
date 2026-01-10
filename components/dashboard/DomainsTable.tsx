@@ -64,7 +64,7 @@ export function DomainsTable({
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <h2 className="text-2xl font-semibold text-gray-900 mb-2">Your Websites or Domains</h2>
       <p className="text-gray-600 text-sm mb-6">
-        Add the domains where you'll embed the tracking script. Maximum {maxDomains} domains per account.
+        Add the domains where you&apos;ll embed the tracking script. Maximum {maxDomains} domains per account.
       </p>
 
       <div className="mb-6">

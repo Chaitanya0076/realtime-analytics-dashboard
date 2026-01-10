@@ -1,0 +1,18 @@
+# for the processor to run as container in ec2 instance
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy only processor files
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY src ./src
+COPY tsconfig.json ./tsconfig.json
+
+# Build TS → JS
+RUN npx tsc
+
+ENV NODE_ENV=production
+
+CMD ["node", "dist/index.js"]

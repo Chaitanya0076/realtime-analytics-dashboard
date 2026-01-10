@@ -1,6 +1,7 @@
 import { getServerAuthSession } from "@/lib/getServerAuth";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { domainIdSchema } from "@/lib/validations";
 
 type RouteParams = {
     params: Promise<{ id: string }>;
@@ -29,6 +30,15 @@ export async function DELETE(_req: Request, {params}: RouteParams){
 
     const userId = session.user.id;
     const {id} = await params;
+
+    // Validate domain ID
+    const idValidation = domainIdSchema.safeParse(id);
+    if (!idValidation.success) {
+        return NextResponse.json(
+            { error: "Invalid domain ID" },
+            { status: 400 }
+        );
+    }
 
     try{
         const {error, status, domain} = await getOwnedDomainById(id,userId);
@@ -61,6 +71,15 @@ export async function PATCH(_req: Request, {params}: RouteParams){
 
     const userId = session.user.id;
     const {id} = await params;
+
+    // Validate domain ID
+    const idValidation = domainIdSchema.safeParse(id);
+    if (!idValidation.success) {
+        return NextResponse.json(
+            { error: "Invalid domain ID" },
+            { status: 400 }
+        );
+    }
 
     try{
         const {error, status, domain} = await getOwnedDomainById(id, userId);
