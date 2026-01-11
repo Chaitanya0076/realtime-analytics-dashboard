@@ -1,4 +1,4 @@
-import { Granularity } from "@/app/generated/prisma/enums";
+import { Granularity } from "../generated/prisma/enums";
 import prisma from "./prisma";
 
 export type  TimeSeriesPoint = {
