@@ -18,6 +18,23 @@ export const signupSchema = z.object({
     .max(128, "Password must be less than 128 characters"),
 });
 
+// Helper function to normalize domain (same as in route handler)
+function normalizeDomainForValidation(domain: string): string {
+  const trimmedDomain = domain.trim().toLowerCase();
+  // Remove protocol (http://, https://)
+  let normalized = trimmedDomain.replace(/^https?:\/\//, "");
+  // Remove www. prefix
+  normalized = normalized.replace(/^www\./, "");
+  // Remove trailing slashes
+  normalized = normalized.replace(/\/+$/, "");
+  // Remove any path after domain
+  normalized = normalized.split('/')[0];
+  // Remove port numbers
+  normalized = normalized.split(':')[0];
+  // Final trim to ensure no leading/trailing spaces
+  return normalized.trim();
+}
+
 // Domain validation schema
 export const domainSchema = z.object({
   name: z
@@ -26,17 +43,26 @@ export const domainSchema = z.object({
     .max(255, "Domain name must be less than 255 characters")
     .refine(
       (val) => {
-        const normalized = val.trim().toLowerCase();
+        // Normalize the domain first (handle URLs, www, trailing slashes, etc.)
+        const normalized = normalizeDomainForValidation(val);
+        
+        if (normalized.length === 0) {
+          return false;
+        }
+        
         // Allow localhost for development
         if (normalized === "localhost" || normalized.startsWith("localhost:")) {
           return true;
         }
-        // Standard domain validation
+        
+        // Standard domain validation - accepts all TLDs including .in, .app, .dev, .net, etc.
+        // Pattern: domain name with at least one dot and TLD of 2+ characters
+        // Examples: example.com, subdomain.example.in, my-site.app, test.dev, domain.net
         const domainRegex = /^[a-z0-9]([a-z0-9.-]*[a-z0-9])?(\.[a-z]{2,})+$/;
         return domainRegex.test(normalized);
       },
       {
-        message: "Invalid domain name format",
+        message: "Invalid domain name format. Please enter a valid domain (e.g., example.com, mysite.app, domain.in)",
       }
     ),
 });

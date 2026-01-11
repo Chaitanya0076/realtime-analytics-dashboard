@@ -15,6 +15,8 @@ function normalizeDomain(domain: string): string {
     normalized = normalized.replace(/\/+$/, "");
     // Remove any path after domain
     normalized = normalized.split('/')[0];
+    // Remove port numbers
+    normalized = normalized.split(':')[0];
     // Final trim to ensure no leading/trailing spaces
     return normalized.trim();
 }
