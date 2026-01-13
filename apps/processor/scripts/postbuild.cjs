@@ -16,6 +16,35 @@ if (!fs.existsSync(distDir)) {
   process.exit(1);
 }
 
+// TypeScript may create nested structure: dist/apps/processor/src/
+// We need to move files from nested structure to dist/
+const nestedSrcDir = path.join(distDir, 'apps', 'processor', 'src');
+const nestedIndexPath = path.join(nestedSrcDir, 'index.js');
+
+// Check if nested structure exists
+if (fs.existsSync(nestedIndexPath)) {
+  console.log('Reorganizing build output from nested structure...');
+  
+  // Move all files from nested structure to dist/
+  const files = fs.readdirSync(nestedSrcDir);
+  files.forEach(file => {
+    const srcPath = path.join(nestedSrcDir, file);
+    const destPath = path.join(distDir, file);
+    
+    if (fs.statSync(srcPath).isFile()) {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  });
+  
+  // Remove nested directories
+  const appsDir = path.join(distDir, 'apps');
+  if (fs.existsSync(appsDir)) {
+    fs.rmSync(appsDir, { recursive: true, force: true });
+  }
+  
+  console.log('✓ Reorganized build output');
+}
+
 // Verify that index.js exists in dist
 const indexPath = path.join(distDir, 'index.js');
 if (!fs.existsSync(indexPath)) {
