@@ -1,5 +1,5 @@
-import { InternalEventV1 } from "./types";
-import { toMinuteBucket, toHourBucket } from "./buckets";
+import { InternalEventV1 } from "./types.js";
+import { toMinuteBucket, toHourBucket } from "./buckets.js";
 
 type AggregateKey = string;
 

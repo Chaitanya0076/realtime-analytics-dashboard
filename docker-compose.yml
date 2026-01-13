@@ -4,16 +4,37 @@ services:
   redpanda:
     image: redpandadata/redpanda:latest
     container_name: redpanda
-    command: ["redpanda", "start", "--overprovisioned", "--smp", "1", "--memory", "1G", "--reserve-memory", "0M", "--node-id", "0", "--check=false", "--kafka-addr", "PLAINTEXT://0.0.0.0:9002", "--advertise-kafka-addr", "PLAINTEXT://localhost:9002"]
+    restart: always
+    # Bind to all interfaces for external access (Vercel)
+    # advertise-kafka-addr should be EC2 public IP or hostname for external clients
+    # For internal (processor), localhost works fine
+    # IMPORTANT: Replace 35.154.159.223 with your actual EC2 public IP
+    # This tells external clients (Vercel) where to connect
+    # Internal clients (processor) can still use localhost:9002
+    command: ["redpanda", "start", "--overprovisioned", "--smp", "1", "--memory", "1G", "--reserve-memory", "0M", "--node-id", "0", "--check=false", "--kafka-addr", "PLAINTEXT://0.0.0.0:9002", "--advertise-kafka-addr", "PLAINTEXT://35.154.159.223:9002"]
     ports:
-      - "9002:9002"
+      - "0.0.0.0:9002:9002"  # Bind to all interfaces for external access
     volumes:
       - redpanda-data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
   redis:
     image: "redis:latest"
     container_name: analytics-redis
+    restart: always
     ports:
-      - "6379:6379"
+      - "0.0.0.0:6379:6379"  # Bind to all interfaces for external access (Vercel)
+    # Optional: Add password protection for production
+    # command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
 volumes:
   redpanda-data:
