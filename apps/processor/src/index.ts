@@ -19,7 +19,19 @@ const projectRoot = isCompiled
   : resolve(__dirname, '../../../..'); // src -> processor -> apps -> root
 
 // Load .env from project root
-config({ path: resolve(projectRoot, '.env') });
+// Use override: true to ensure .env file values take precedence over PM2/system env vars
+const envPath = resolve(projectRoot, '.env');
+console.log('[processor] Loading .env from:', envPath);
+const envResult = config({ path: envPath, override: true });
+if (envResult.error) {
+  console.warn('[processor] Warning: Error loading .env file:', envResult.error.message);
+} else {
+  console.log('[processor] .env file loaded successfully (with override: true)');
+}
+
+// Log environment variables (before and after .env load for debugging)
+console.log('[processor] KAFKA_BROKER from environment:', process.env.KAFKA_BROKER || '(not set)');
+console.log('[processor] DATABASE_URL set:', !!process.env.DATABASE_URL);
 
 // Validate required environment variables
 const requiredEnvVars = ['KAFKA_BROKER', 'DATABASE_URL'];
@@ -28,6 +40,14 @@ const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 if (missingEnvVars.length > 0) {
   console.error('[processor] Missing required environment variables:', missingEnvVars.join(', '));
   process.exit(1);
+}
+
+// Validate KAFKA_BROKER value
+if (process.env.KAFKA_BROKER && process.env.KAFKA_BROKER.includes('35.154.159.223')) {
+  console.error('[processor] ERROR: KAFKA_BROKER is set to EC2 public IP instead of localhost!');
+  console.error('[processor] Current value:', process.env.KAFKA_BROKER);
+  console.error('[processor] This usually means PM2 has environment variables set that override .env file');
+  console.error('[processor] Fix: pm2 delete my-processor && pm2 start ... (without --env vars)');
 }
 
 const kafka = new Kafka({
