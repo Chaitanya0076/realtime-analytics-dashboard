@@ -76,7 +76,7 @@ async function initializePrisma(): Promise<PrismaClientType> {
   } catch (error) {
     // Fallback: try using @prisma/client package
     try {
-      const PrismaModule = await import('@prisma/client') as { PrismaClient: new (args: { adapter: PrismaPg }) => PrismaClientType };
+      const PrismaModule = await import('@prisma/client') as unknown as { PrismaClient: new (args: { adapter: PrismaPg }) => PrismaClientType };
       const PrismaClient = PrismaModule.PrismaClient;
       prisma = new PrismaClient({ adapter });
       return prisma;
