@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 /* eslint-disable @typescript-eslint/no-require-imports */
-// This is a CommonJS file (.cjs), so require() is the correct syntax
+// Verify build output and reorganize if needed
 
 const fs = require('fs');
 const path = require('path');
 
-// Use absolute paths to avoid issues with current working directory
 const scriptDir = __dirname;
 const processorDir = path.resolve(scriptDir, '..');
 const distDir = path.resolve(processorDir, 'dist');
