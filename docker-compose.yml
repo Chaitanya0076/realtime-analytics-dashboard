@@ -5,15 +5,32 @@ services:
     image: redpandadata/redpanda:latest
     container_name: redpanda
     restart: always
-    # Bind to all interfaces for external access (Vercel)
-    # advertise-kafka-addr should be EC2 public IP or hostname for external clients
-    # For internal (processor), localhost works fine
+    # Two Kafka listeners:
+    # - internal (port 9002): for processor on same EC2 host, advertises localhost
+    # - external (port 9003): for Vercel, advertises EC2 public IP
     # IMPORTANT: Replace 35.154.159.223 with your actual EC2 public IP
-    # This tells external clients (Vercel) where to connect
-    # Internal clients (processor) can still use localhost:9002
-    command: ["redpanda", "start", "--overprovisioned", "--smp", "1", "--memory", "1G", "--reserve-memory", "0M", "--node-id", "0", "--check=false", "--kafka-addr", "PLAINTEXT://0.0.0.0:9002", "--advertise-kafka-addr", "PLAINTEXT://35.154.159.223:9002"]
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - 1G
+      - --reserve-memory
+      - 0M
+      - --node-id
+      - "0"
+      - --check=false
+      # Internal listener (for processor on EC2 host)
+      - --kafka-addr
+      - internal://0.0.0.0:9002,external://0.0.0.0:9003
+      # Advertise addresses: internal→localhost, external→public IP
+      - --advertise-kafka-addr
+      - internal://localhost:9002,external://35.154.159.223:9003
     ports:
-      - "0.0.0.0:9002:9002"  # Bind to all interfaces for external access
+      - "127.0.0.1:9002:9002"  # Internal: only localhost (for processor)
+      - "0.0.0.0:9003:9003"    # External: all interfaces (for Vercel)
     volumes:
       - redpanda-data:/var/lib/redpanda/data
     healthcheck:
