@@ -257,22 +257,31 @@ export function AnalyticsDashboard({ initialDomains, userEmail, userName, userIm
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <BarChart3 className="w-6 h-6 text-white" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
+            {/* Logo and Title */}
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="bg-blue-600 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+                <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-                <p className="text-sm text-gray-500">Track your website performance</p>
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">
+                  Analytics Dashboard
+                </h1>
+                <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">
+                  Track your website performance
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
-                <Globe className="w-4 h-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">
-                  {activeDomainsCount} / 5 Active Domains
+            
+            {/* Right side: Domain count and Avatar */}
+            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+              {/* Domain count - compact on mobile */}
+              <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-100 rounded-lg">
+                <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
+                <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">
+                  <span className="sm:hidden">{activeDomainsCount}/5</span>
+                  <span className="hidden sm:inline">{activeDomainsCount} / 5 Active Domains</span>
                 </span>
               </div>
               <UserAvatar email={userEmail} name={userName} image={userImage} />

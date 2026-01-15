@@ -22,6 +22,7 @@ export async function GET() {
     _sum: { count: true },
     where: {
       domainId: { in: domains.map(d => d.id) },
+      granularity: "HOUR", // Use HOUR granularity to avoid double counting with MINUTE
       path: "", // empty string represents domain-level aggregates
     },
   });

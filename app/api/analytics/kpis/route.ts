@@ -45,6 +45,7 @@ export async function GET(req: Request) {
       _sum: { count: true },
       where: {
         domainId,
+        granularity: "HOUR", // Use HOUR granularity to avoid double counting with MINUTE
         path: "", // empty string represents domain-level aggregates
       },
     }),

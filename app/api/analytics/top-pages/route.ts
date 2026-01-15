@@ -28,9 +28,13 @@ export async function GET(req: Request) {
     from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   }
 
+  // Determine granularity based on range to avoid double counting
+  const granularity = range === "30m" ? "MINUTE" : "HOUR";
+
   const rows = await prisma.analytics.findMany({
     where: {
       domainId,
+      granularity,
       bucket: { gte: from },
       path: { not: "" }, // exclude domain-level aggregates (empty string)
     },
