@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { BarChart3, TrendingUp, Zap, Shield, Globe, ArrowRight } from "lucide-react";
+import { BarChart3, TrendingUp, Zap, Shield, Globe, ArrowRight, Menu, X } from "lucide-react";
 import { useState } from "react";
 
 export default function Home() {
   const [isVisible] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const features = [
     {
@@ -36,22 +37,62 @@ export default function Home() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
+            {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <BarChart3 className="w-6 h-6 text-white" />
+              <div className="bg-blue-600 p-1.5 sm:p-2 rounded-lg">
+                <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">Analytics Pro</span>
+              <span className="text-base sm:text-lg lg:text-xl font-bold text-gray-900">Analytics Pro</span>
             </div>
-            <div className="flex items-center gap-4">
+
+            {/* Desktop Navigation */}
+            <div className="hidden sm:flex items-center gap-2 sm:gap-4">
               <Link
                 href="/auth/signin"
-                className="px-4 py-2 text-gray-700 font-medium hover:text-gray-900 transition-colors"
+                className="px-3 sm:px-4 py-2 text-gray-700 font-medium hover:text-gray-900 transition-colors text-sm sm:text-base"
               >
                 Sign In
               </Link>
               <Link
                 href="/auth/signup"
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
+                className="px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg text-sm sm:text-base"
+              >
+                Get Started
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="sm:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+          </div>
+
+          {/* Mobile Menu */}
+          <div
+            className={`sm:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+              isMobileMenuOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="py-4 space-y-3 border-t border-gray-200">
+              <Link
+                href="/auth/signin"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-4 py-3 text-gray-700 font-medium hover:bg-gray-50 rounded-lg transition-colors text-center"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/auth/signup"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block mx-4 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-md text-center"
               >
                 Get Started
               </Link>

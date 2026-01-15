@@ -53,7 +53,7 @@ export function TopPagesBarChart({ data, timeInterval, onTimeIntervalChange, isL
           <h2 className="text-2xl font-semibold text-gray-900">Top 10 Viewed Pages</h2>
           <TimeIntervalSelector selected={timeInterval} onChange={onTimeIntervalChange} />
         </div>
-        <div className="flex items-center justify-center h-96">
+        <div className="flex items-center justify-center h-80">
           <p className="text-gray-500">Loading...</p>
         </div>
       </div>
@@ -68,22 +68,22 @@ export function TopPagesBarChart({ data, timeInterval, onTimeIntervalChange, isL
       </div>
 
       {data.length === 0 ? (
-        <div className="flex items-center justify-center h-96">
+        <div className="flex items-center justify-center h-80">
           <p className="text-gray-500">No data available</p>
         </div>
       ) : (
-        <div style={{ height: '384px' }}>
+        <div style={{ height: '320px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
-              margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
+              margin={{ top: 10, right: 30, left: 20, bottom: 80 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis
                 dataKey="url"
                 angle={-45}
                 textAnchor="end"
-                height={100}
+                height={80}
                 tick={{ fontSize: 12 }}
                 tickFormatter={truncateUrl}
               />
