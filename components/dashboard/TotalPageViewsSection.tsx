@@ -30,7 +30,7 @@ export function TotalPageViewsSection({ data }: TotalPageViewsSectionProps) {
       <h2 className="text-2xl font-semibold text-gray-900 mb-6">Total Page Views</h2>
       
       <div className="flex flex-col lg:flex-row items-center justify-center gap-8">
-        <div className="w-full lg:w-1/2" style={{ height: '320px' }}>
+        <div className="w-full lg:w-1/2 [&_svg]:outline-none [&_*]:outline-none" style={{ height: '320px' }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

@@ -78,7 +78,7 @@ export function PageViewDetailChart({
           <p className="text-gray-500">No time series data available</p>
         </div>
       ) : (
-        <div style={{ height: '320px' }} className="mb-6">
+        <div style={{ height: '320px' }} className="mb-6 [&_svg]:outline-none [&_*]:outline-none">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={data}

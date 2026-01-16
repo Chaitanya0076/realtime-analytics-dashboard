@@ -130,7 +130,7 @@ export function WebsiteSpecificBarChart({
         </div>
       ) : (
         <>
-          <div style={{ height: '320px' }}>
+          <div style={{ height: '320px' }} className="[&_svg]:outline-none [&_*]:outline-none">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={data}
@@ -155,7 +155,7 @@ export function WebsiteSpecificBarChart({
                   fill="#8b5cf6" 
                   radius={[8, 8, 0, 0]} 
                   cursor="pointer"
-                  className="hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity focus:outline-none"
                   onClick={(event) => {
                     if (event && 'payload' in event && event.payload) {
                       onPageClick(event.payload as PageData);

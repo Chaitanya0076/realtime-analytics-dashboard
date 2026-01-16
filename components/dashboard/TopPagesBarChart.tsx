@@ -72,7 +72,7 @@ export function TopPagesBarChart({ data, timeInterval, onTimeIntervalChange, isL
           <p className="text-gray-500">No data available</p>
         </div>
       ) : (
-        <div style={{ height: '320px' }}>
+        <div style={{ height: '320px' }} className="[&_svg]:outline-none [&_*]:outline-none">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
@@ -92,7 +92,7 @@ export function TopPagesBarChart({ data, timeInterval, onTimeIntervalChange, isL
                 label={{ value: 'Page Views', angle: -90, position: 'insideLeft' }}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="views" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="views" fill="#3b82f6" radius={[8, 8, 0, 0]} className="focus:outline-none" />
             </BarChart>
           </ResponsiveContainer>
         </div>
