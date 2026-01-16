@@ -353,10 +353,10 @@ The production setup uses:
 | `DATABASE_URL` | PostgreSQL connection string | ✅ Yes | - |
 | `NEXTAUTH_SECRET` | Secret for JWT encryption | ✅ Yes | - |
 | `NEXTAUTH_URL` | Base URL of your application | ✅ Yes | - |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID | ❌ No | - |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | ❌ No | - |
-| `GITHUB_CLIENT_ID` | GitHub OAuth client ID | ❌ No | - |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth client secret | ❌ No | - |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID | ✅ Yes | - |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | ✅ Yes | - |
+| `GITHUB_CLIENT_ID` | GitHub OAuth client ID | ⚠️ Optional* | - |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth client secret | ⚠️ Optional* | - |
 | `KAFKA_BROKER` | Kafka broker address | ✅ Yes | `localhost:9092` |
 | `REDIS_URL` | Redis connection URL | ✅ Yes | `redis://localhost:6379` |
 
@@ -411,7 +411,6 @@ npx prisma studio
 ## 📚 Additional Documentation
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - System architecture and deployment
-- [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) - Detailed project structure
 
 ---
 
