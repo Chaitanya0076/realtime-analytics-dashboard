@@ -1,0 +1,76 @@
+# Docker Compose for Local Development
+# This file sets up Kafka (Redpanda) and Redis for local development
+
+version: "3.8"
+
+services:
+  # Redpanda (Kafka-compatible message broker)
+  redpanda:
+    image: redpandadata/redpanda:latest
+    container_name: redpanda-local
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp
+      - "1"
+      - --memory
+      - 512M
+      - --reserve-memory
+      - 0M
+      - --node-id
+      - "0"
+      - --check=false
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr
+      - PLAINTEXT://localhost:9092
+    ports:
+      - "9092:9092"      # Kafka API
+      - "9644:9644"      # Admin API (for rpk commands)
+    volumes:
+      - redpanda-local-data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Redis (Caching layer)
+  redis:
+    image: redis:7-alpine
+    container_name: redis-local
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-local-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # PostgreSQL (Optional - use this if you don't have a local PostgreSQL)
+  # Uncomment this section if you want to run PostgreSQL in Docker
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: postgres-local
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: analytics_db
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres-local-data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+volumes:
+  redpanda-local-data:
+  redis-local-data:
+  # postgres-local-data:  # Uncomment if using PostgreSQL container

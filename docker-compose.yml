@@ -1,5 +1,17 @@
 version: "3.8"
 
+# =============================================================================
+# PRODUCTION DOCKER COMPOSE - For EC2 Deployment
+# =============================================================================
+# 
+# IMPORTANT: Before deploying, set the EC2_PUBLIC_IP environment variable:
+#   export EC2_PUBLIC_IP="your.ec2.public.ip"
+#   docker-compose up -d
+#
+# Or create a .env file in the same directory with:
+#   EC2_PUBLIC_IP=your.ec2.public.ip
+# =============================================================================
+
 services:
   redpanda:
     image: redpandadata/redpanda:latest
@@ -8,7 +20,6 @@ services:
     # Two Kafka listeners:
     # - internal (port 9002): for processor on same EC2 host, advertises localhost
     # - external (port 9003): for Vercel, advertises EC2 public IP
-    # IMPORTANT: Replace 35.154.159.223 with your actual EC2 public IP
     command:
       - redpanda
       - start
@@ -27,7 +38,7 @@ services:
       - internal://0.0.0.0:9002,external://0.0.0.0:9003
       # Advertise addresses: internal→localhost, external→public IP
       - --advertise-kafka-addr
-      - internal://localhost:9002,external://35.154.159.223:9003
+      - internal://localhost:9002,external://${EC2_PUBLIC_IP}:9003
     ports:
       - "127.0.0.1:9002:9002"  # Internal: only localhost (for processor)
       - "0.0.0.0:9003:9003"    # External: all interfaces (for Vercel)

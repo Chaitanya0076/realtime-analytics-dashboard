@@ -42,12 +42,17 @@ if (missingEnvVars.length > 0) {
   process.exit(1);
 }
 
-// Validate KAFKA_BROKER value
-if (process.env.KAFKA_BROKER && process.env.KAFKA_BROKER.includes('35.154.159.223')) {
-  console.error('[processor] ERROR: KAFKA_BROKER is set to EC2 public IP instead of localhost!');
-  console.error('[processor] Current value:', process.env.KAFKA_BROKER);
-  console.error('[processor] This usually means PM2 has environment variables set that override .env file');
-  console.error('[processor] Fix: pm2 delete my-processor && pm2 start ... (without --env vars)');
+// Validate KAFKA_BROKER value - warn if using external IP when running on EC2
+// The processor should use localhost:9002 (internal) when running on the same EC2 instance
+const kafkaBroker = process.env.KAFKA_BROKER || '';
+const isPublicIP = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$/.test(kafkaBroker) && 
+                   !kafkaBroker.startsWith('127.') && 
+                   !kafkaBroker.startsWith('localhost');
+
+if (isPublicIP) {
+  console.warn('[processor] WARNING: KAFKA_BROKER appears to be a public IP:', kafkaBroker);
+  console.warn('[processor] If running on EC2, use localhost:9002 (internal) for better performance');
+  console.warn('[processor] This may also indicate PM2 env vars overriding .env file');
 }
 
 const kafka = new Kafka({

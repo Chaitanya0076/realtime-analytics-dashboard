@@ -2,6 +2,9 @@
 
 A modern, real-time web analytics platform that tracks page views, provides detailed insights, and offers a beautiful dashboard for monitoring website performance. Built with Next.js, TypeScript, and a scalable event-driven architecture.
 
+🔗 **Live Demo**: [analyticspro.devwithease.com](https://analyticspro.devwithease.com)  
+📦 **Repository**: [github.com/Chaitanya0076/realtime-analytics-dashboard](https://github.com/Chaitanya0076/realtime-analytics-dashboard)
+
 ## ✨ Features
 
 - **Real-time Analytics**: Track page views and user interactions in real-time
@@ -21,12 +24,11 @@ A modern, real-time web analytics platform that tracks page views, provides deta
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **Next.js 16** - React framework with App Router
+- **Next.js 15** - React framework with App Router
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first CSS framework
 - **Recharts** - Data visualization library
-- **React Icons** - Icon library
-- **Lucide React** - Additional icons
+- **Lucide React** - Icons
 
 ### Backend
 - **Next.js API Routes** - Serverless API endpoints
@@ -36,60 +38,60 @@ A modern, real-time web analytics platform that tracks page views, provides deta
 
 ### Infrastructure
 - **PostgreSQL** - Primary database
-- **Redis** - Caching layer
+- **Redis** - Caching layer for real-time data
 - **Kafka (Redpanda)** - Message queue for event streaming
 - **Docker** - Containerization for services
 
-## 📋 Prerequisites
+---
+
+## 🚀 Local Development Setup
+
+Follow these steps to run the project locally.
+
+### Prerequisites
 
 Before you begin, ensure you have the following installed:
 
 - **Node.js** 18+ and npm
-- **Docker** and Docker Compose (for Kafka and Redis)
-- **PostgreSQL** database (local or remote)
+- **Docker** and Docker Compose
 - **Git**
 
-## 🚀 Getting Started
-
-### 1. Clone the Repository
+### Step 1: Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Chaitanya0076/realtime-analytics-dashboard.git
 cd realtime-analytics-dashboard
 ```
 
-### 2. Install Dependencies
+### Step 2: Set Up Environment Variables
+
+Copy the example environment file and configure it:
 
 ```bash
-npm install
+cp .env.example .env
 ```
 
-### 3. Set Up Environment Variables
-
-Create a `.env` file in the root directory:
+Edit the `.env` file with your configuration:
 
 ```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/analytics_db"
+# Database (use local PostgreSQL or a cloud service like Supabase)
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/analytics_db"
 
-# NextAuth
-NEXTAUTH_SECRET="your-secret-key-here-generate-with-openssl-rand-base64-32"
+# NextAuth Configuration
+NEXTAUTH_SECRET="your-secret-key-here"  # Generate with: openssl rand -base64 32
 NEXTAUTH_URL="http://localhost:3000"
 
 # OAuth Providers (Optional - for Google/GitHub sign-in)
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-GITHUB_CLIENT_ID="your-github-client-id"
-GITHUB_CLIENT_SECRET="your-github-client-secret"
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=""
 
-# Kafka
-KAFKA_BROKER="localhost:9002"
+# Kafka (Redpanda) - Local development
+KAFKA_BROKER="localhost:9092"
 
-# Redis
+# Redis - Local development
 REDIS_URL="redis://localhost:6379"
-
-# Analytics URL (for tracking script)
-NEXT_PUBLIC_ANALYTICS_URL="http://localhost:3000"
 ```
 
 **Generate NEXTAUTH_SECRET:**
@@ -97,12 +99,12 @@ NEXT_PUBLIC_ANALYTICS_URL="http://localhost:3000"
 openssl rand -base64 32
 ```
 
-### 4. Start Docker Services
+### Step 3: Start Docker Services
 
-Start Kafka (Redpanda) and Redis using Docker Compose:
+Start Kafka (Redpanda) and Redis using the local Docker Compose file:
 
 ```bash
-docker-compose up -d
+docker-compose -f docker-compose.local.yml up -d
 ```
 
 Verify services are running:
@@ -110,167 +112,239 @@ Verify services are running:
 docker ps
 ```
 
-### 5. Set Up Database
+You should see `redpanda-local` and `redis-local` containers running.
 
-Run Prisma migrations to create database tables:
+### Step 4: Install Dependencies
 
-```bash
-npx prisma migrate dev
-```
-
-Generate Prisma client:
-```bash
-npx prisma generate
-```
-
-### 6. Start the Development Server
+Install dependencies for the main application:
 
 ```bash
-npm run dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### 7. Start the Event Processor
-
-In a separate terminal, start the event processor service:
+Install dependencies for the event processor:
 
 ```bash
 cd apps/processor
 npm install
+cd ../..
+```
+
+### Step 5: Set Up the Database
+
+If you're using a local PostgreSQL database, make sure it's running. Then run Prisma migrations:
+
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Run database migrations
+npx prisma migrate dev
+```
+
+### Step 6: Start the Development Servers
+
+You need to run **two terminals** - one for the Next.js app and one for the event processor.
+
+**Terminal 1 - Start Next.js App:**
+```bash
 npm run dev
 ```
 
-The processor consumes events from Kafka and writes aggregated data to PostgreSQL.
+The app will be available at [http://localhost:3000](http://localhost:3000)
+
+**Terminal 2 - Start Event Processor:**
+```bash
+cd apps/processor
+npm run dev
+```
+
+The processor will start consuming events from Kafka and writing to the database.
+
+### Step 7: Create the Kafka Topic (First Time Only)
+
+If this is your first time running the app, create the required Kafka topic:
+
+```bash
+docker exec -it redpanda-local rpk topic create page_views
+```
+
+### Verify Everything is Working
+
+1. Open [http://localhost:3000](http://localhost:3000)
+2. Sign up for a new account
+3. Add a domain to track
+4. Embed the tracking script on your test website
+5. Visit your test website and check the dashboard for analytics
+
+---
 
 ## 📁 Project Structure
 
-For a detailed project structure, see [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
-
 ```
 realtime-analytics-dashboard/
-├── app/                    # Next.js App Router
-│   ├── api/               # API endpoints
-│   ├── auth/              # Authentication pages
-│   └── dashboard/         # Dashboard page
-├── apps/processor/        # Event processor service
-├── components/            # React components
-├── lib/                   # Utility functions
-├── prisma/                # Database schema & migrations
-└── public/                # Static assets (tracker.js)
+├── app/                        # Next.js App Router
+│   ├── api/                    # API endpoints
+│   │   ├── analytics/          # Analytics data endpoints
+│   │   ├── auth/               # Authentication endpoints
+│   │   ├── domains/            # Domain management
+│   │   └── events/             # Event ingestion (tracker.js endpoint)
+│   ├── auth/                   # Auth pages (signin/signup)
+│   └── dashboard/              # Dashboard page
+│
+├── apps/processor/             # Event processor service
+│   └── src/
+│       ├── index.ts            # Kafka consumer entry point
+│       ├── aggregator.ts       # Event aggregation logic
+│       ├── dbWriter.ts         # PostgreSQL writer
+│       └── redisUpdater.ts     # Redis cache updater
+│
+├── components/dashboard/       # Dashboard UI components
+│   ├── AnalyticsDashboard.tsx  # Main dashboard container
+│   ├── TopPagesBarChart.tsx    # Top pages visualization
+│   ├── TotalPageViewsSection.tsx # Overview with pie chart
+│   └── ...
+│
+├── lib/                        # Shared utilities
+│   ├── prisma.ts               # Prisma client
+│   ├── kafka.ts                # Kafka producer
+│   ├── redisAnalytics.ts       # Redis operations
+│   └── auth.ts                 # Auth utilities
+│
+├── prisma/                     # Database schema & migrations
+│   └── schema.prisma           # Prisma schema
+│
+├── public/
+│   └── tracker.js              # Client-side tracking script
+│
+├── docker-compose.local.yml    # Local development services
+├── docker-compose.yml          # Production services (EC2)
+└── package.json
 ```
+
+For a detailed structure, see [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md).
+
+---
 
 ## 🔌 API Endpoints
 
 ### Authentication
-- `POST /api/auth/signup` - Create new user account
-- `POST /api/auth/[...nextauth]` - NextAuth handlers
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/signup` | Create new user account |
+| POST | `/api/auth/[...nextauth]` | NextAuth handlers |
 
 ### Domains
-- `GET /api/domains` - Get user's domains
-- `POST /api/domains` - Add new domain
-- `DELETE /api/domains/[id]` - Delete domain
-- `PATCH /api/domains/[id]` - Toggle domain status
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/domains` | Get user's domains |
+| POST | `/api/domains` | Add new domain |
+| DELETE | `/api/domains/[id]` | Delete domain |
+| PATCH | `/api/domains/[id]` | Toggle domain status |
 
 ### Analytics
-- `POST /api/events` - Receive page view events (used by tracker.js)
-- `GET /api/analytics/overview` - Get overview statistics
-- `GET /api/analytics/top-pages` - Get top pages
-- `GET /api/analytics/timeseries` - Get time-series data
-- `GET /api/analytics/kpis` - Get key performance indicators
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/events` | Receive page view events |
+| GET | `/api/analytics/overview` | Get overview statistics |
+| GET | `/api/analytics/top-pages` | Get top pages |
+| GET | `/api/analytics/timeseries` | Get time-series data |
+| GET | `/api/analytics/kpis` | Get KPIs (total views, etc.) |
+
+---
 
 ## 📊 How It Works
 
 ### Data Flow
 
 ```
-User's Website
-    ↓ (tracker.js embedded)
-/api/events (Next.js API)
-    ↓ (Kafka/Redpanda)
-Event Processor
-    ↓ (Aggregation)
-PostgreSQL + Redis
-    ↓
-Dashboard UI
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  User's Website │     │   Next.js API   │     │     Kafka       │
+│                 │────▶│   /api/events   │────▶│   (Redpanda)    │
+│  (tracker.js)   │     │                 │     │                 │
+└─────────────────┘     └─────────────────┘     └────────┬────────┘
+                                                         │
+                                                         ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Dashboard     │◀────│   PostgreSQL    │◀────│    Processor    │
+│      UI         │     │   + Redis       │     │   (Consumer)    │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
 ```
+
+1. **Tracking**: `tracker.js` sends page view events to `/api/events`
+2. **Ingestion**: API validates and publishes events to Kafka
+3. **Processing**: Event processor consumes from Kafka, aggregates data
+4. **Storage**: Aggregated data is written to PostgreSQL and cached in Redis
+5. **Display**: Dashboard fetches and displays analytics data
 
 ### Tracking Script Integration
 
 1. Sign up and add your domain in the dashboard
 2. Copy the tracking script from the dashboard
-3. Paste it in your website's `<head>` or before `</body>`
-4. The script automatically tracks page views and sends them to the analytics server
+3. Add it to your website's `<head>` or before `</body>`:
 
-Example:
 ```html
 <script src="https://your-analytics-domain.com/tracker.js" async></script>
 ```
 
-## 🔐 Authentication
+---
 
-The application supports three authentication methods:
+## 🧪 Available Scripts
 
-1. **Email/Password**: Traditional credentials-based signup and signin
-2. **Google OAuth**: Sign in with Google account
-3. **GitHub OAuth**: Sign in with GitHub account
-
-**Account Linking**: If you sign up with email/password and later sign in with Google/GitHub using the same email, your accounts will be automatically linked.
-
-## 🧪 Development
-
-### Available Scripts
+### Main Application
 
 ```bash
-# Development
 npm run dev          # Start Next.js dev server
 npm run build        # Build for production
 npm run start        # Start production server
 npm run lint         # Run ESLint
-
-# Database
-npx prisma studio    # Open Prisma Studio (database GUI)
-npx prisma migrate dev # Create and apply migrations
-npx prisma generate  # Generate Prisma client
 ```
 
-### Running the Event Processor
+### Database
 
-The event processor must run separately:
+```bash
+npx prisma studio    # Open Prisma Studio (database GUI)
+npx prisma migrate dev   # Create and apply migrations
+npx prisma generate  # Generate Prisma client
+npx prisma db push   # Push schema changes (skip migrations)
+```
+
+### Docker
+
+```bash
+# Local development
+docker-compose -f docker-compose.local.yml up -d     # Start services
+docker-compose -f docker-compose.local.yml down      # Stop services
+docker-compose -f docker-compose.local.yml logs -f   # View logs
+
+# Check Kafka topics
+docker exec -it redpanda-local rpk topic list
+docker exec -it redpanda-local rpk topic create page_views
+```
+
+### Processor
 
 ```bash
 cd apps/processor
-npm run dev
+npm run dev          # Start in development mode
+npm run build        # Build for production
+npm run start        # Start production build
 ```
 
-### Debugging
-
-See [DEBUGGING.md](./DEBUGGING.md) for detailed debugging instructions.
+---
 
 ## 🚢 Deployment
 
-### Environment Variables for Production
+For production deployment architecture and instructions, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
-Update your production `.env` with:
-- Production database URL
-- Production NextAuth URL
-- OAuth provider credentials
-- Production Kafka broker URL
-- Production Redis URL
+### Quick Overview
 
-### Build for Production
+The production setup uses:
+- **Vercel** - Next.js frontend hosting
+- **AWS EC2** - Kafka (Redpanda), Redis, and Event Processor
+- **Supabase** - PostgreSQL database
 
-```bash
-npm run build
-npm run start
-```
-
-### Docker Services
-
-Ensure Kafka and Redis are running in production. You can use managed services like:
-- **Kafka**: AWS MSK, Confluent Cloud, or self-hosted
-- **Redis**: AWS ElastiCache, Redis Cloud, or self-hosted
-- **PostgreSQL**: AWS RDS, Supabase, or self-hosted
+---
 
 ## 📝 Environment Variables Reference
 
@@ -283,37 +357,63 @@ Ensure Kafka and Redis are running in production. You can use managed services l
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | ❌ No | - |
 | `GITHUB_CLIENT_ID` | GitHub OAuth client ID | ❌ No | - |
 | `GITHUB_CLIENT_SECRET` | GitHub OAuth client secret | ❌ No | - |
-| `KAFKA_BROKER` | Kafka broker address | ❌ No | `localhost:9002` |
-| `REDIS_URL` | Redis connection URL | ❌ No | `redis://localhost:6379` |
-| `NEXT_PUBLIC_ANALYTICS_URL` | Public URL for tracking script | ❌ No | - |
+| `KAFKA_BROKER` | Kafka broker address | ✅ Yes | `localhost:9092` |
+| `REDIS_URL` | Redis connection URL | ✅ Yes | `redis://localhost:6379` |
+
+---
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **Database Connection Error**
+1. **Docker services not starting**
+   ```bash
+   docker-compose -f docker-compose.local.yml down
+   docker-compose -f docker-compose.local.yml up -d
+   ```
+
+2. **Kafka connection error**
+   - Ensure Redpanda container is running: `docker ps`
+   - Check if port 9092 is available
+   - Verify `KAFKA_BROKER` in `.env`
+
+3. **Database connection error**
    - Verify `DATABASE_URL` is correct
    - Ensure PostgreSQL is running
-   - Check database credentials
+   - Run `npx prisma migrate dev` to apply migrations
 
-2. **Kafka Connection Error**
-   - Ensure Docker services are running: `docker-compose up -d`
-   - Check `KAFKA_BROKER` environment variable
+4. **Events not appearing in dashboard**
+   - Verify the event processor is running (`cd apps/processor && npm run dev`)
+   - Check processor logs for errors
+   - Verify Kafka topic exists: `docker exec -it redpanda-local rpk topic list`
 
-3. **Events Not Appearing**
-   - Verify event processor is running
-   - Check Kafka topics: `docker exec -it redpanda rpk topic list`
-   - Review processor logs
+5. **Redis connection error**
+   - Ensure Redis container is running
+   - Verify `REDIS_URL` in `.env`
 
-4. **OAuth Not Working**
-   - Verify OAuth credentials in `.env`
-   - Check callback URLs in OAuth provider settings
-   - Ensure `NEXTAUTH_URL` matches your domain
+### Useful Debug Commands
+
+```bash
+# Check Kafka topics and messages
+docker exec -it redpanda-local rpk topic list
+docker exec -it redpanda-local rpk topic consume page_views
+
+# Check Redis
+docker exec -it redis-local redis-cli ping
+docker exec -it redis-local redis-cli keys "*"
+
+# Check database
+npx prisma studio
+```
+
+---
 
 ## 📚 Additional Documentation
 
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - System architecture and deployment
 - [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) - Detailed project structure
-- [DEBUGGING.md](./DEBUGGING.md) - Debugging guide
+
+---
 
 ## 🤝 Contributing
 
@@ -323,13 +423,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 This project is private and proprietary.
 
-## 🙏 Acknowledgments
-
-- Built with [Next.js](https://nextjs.org)
-- Authentication by [NextAuth.js](https://next-auth.js.org)
-- Database management with [Prisma](https://www.prisma.io)
-- Icons from [React Icons](https://react-icons.github.io/react-icons/)
-
 ---
 
-**Need Help?** Check the [DEBUGGING.md](./DEBUGGING.md) guide or open an issue.
+**Need Help?** Open an issue on GitHub or check the troubleshooting section above.

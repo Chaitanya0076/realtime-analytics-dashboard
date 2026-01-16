@@ -398,7 +398,7 @@ export default function Home() {
             </div>
             <span className="text-xl font-bold text-white">Analytics Pro</span>
           </div>
-          <p className="text-sm">© 2024 Analytics Pro. All rights reserved.</p>
+          <p className="text-sm">© 2026 Analytics Pro. All rights reserved.</p>
         </div>
       </footer>
     </div>
