@@ -21,6 +21,11 @@ import {
   type Domain,
 } from '@/lib/analyticsClient';
 
+// Auto-refresh interval in milliseconds (15 seconds)
+const AUTO_REFRESH_INTERVAL = 15000;
+// Initial delay to allow page view event to be processed (1.5 seconds)
+const INITIAL_FETCH_DELAY = 1500;
+
 interface PageData {
   url: string;
   views: number;
@@ -52,11 +57,35 @@ export function AnalyticsDashboard({ initialDomains, userEmail, userName, userIm
   const [websitePagesData, setWebsitePagesData] = useState<WebsitePageData[]>([]);
   const [timeSeriesData, setTimeSeriesData] = useState<Array<{ time: string; views: number }>>([]);
   
-  // Loading states
+  // Loading states - initialize to true to show loading during initial delay
   const [isLoadingOverview, setIsLoadingOverview] = useState(true);
-  const [isLoadingTopPages, setIsLoadingTopPages] = useState(false);
-  const [isLoadingWebsitePages, setIsLoadingWebsitePages] = useState(false);
+  const [isLoadingTopPages, setIsLoadingTopPages] = useState(true);
+  const [isLoadingWebsitePages, setIsLoadingWebsitePages] = useState(true);
   const [isLoadingTimeSeries, setIsLoadingTimeSeries] = useState(false);
+  
+  // Refresh trigger - increment to force data refresh
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  // Track if initial delay has passed
+  const [initialDelayPassed, setInitialDelayPassed] = useState(false);
+
+  // Initial delay to allow page view event to be processed before fetching data
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setInitialDelayPassed(true);
+    }, INITIAL_FETCH_DELAY);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Auto-refresh timer
+  useEffect(() => {
+    if (!initialDelayPassed) return;
+    
+    const interval = setInterval(() => {
+      setRefreshTrigger(prev => prev + 1);
+    }, AUTO_REFRESH_INTERVAL);
+    
+    return () => clearInterval(interval);
+  }, [initialDelayPassed]);
 
   // Set initial selected domain
   useEffect(() => {
@@ -68,6 +97,8 @@ export function AnalyticsDashboard({ initialDomains, userEmail, userName, userIm
 
   // Fetch overview data
   useEffect(() => {
+    if (!initialDelayPassed) return;
+    
     async function loadOverview() {
       try {
         setIsLoadingOverview(true);
@@ -86,10 +117,12 @@ export function AnalyticsDashboard({ initialDomains, userEmail, userName, userIm
       }
     }
     loadOverview();
-  }, [domains]);
+  }, [domains, initialDelayPassed, refreshTrigger]);
 
   // Fetch top pages (aggregated across all domains)
   useEffect(() => {
+    if (!initialDelayPassed) return;
+    
     async function loadTopPages() {
       if (domains.length === 0) {
         setTopPagesData([]);
@@ -132,10 +165,12 @@ export function AnalyticsDashboard({ initialDomains, userEmail, userName, userIm
       }
     }
     loadTopPages();
-  }, [topPagesInterval, domains]);
+  }, [topPagesInterval, domains, initialDelayPassed, refreshTrigger]);
 
   // Fetch website-specific pages
   useEffect(() => {
+    if (!initialDelayPassed) return;
+    
     async function loadWebsitePages() {
       if (!selectedDomainId) {
         setWebsitePagesData([]);
@@ -159,7 +194,7 @@ export function AnalyticsDashboard({ initialDomains, userEmail, userName, userIm
       }
     }
     loadWebsitePages();
-  }, [selectedDomainId, websiteInterval, domains]);
+  }, [selectedDomainId, websiteInterval, domains, initialDelayPassed, refreshTrigger]);
 
   // Fetch time series data for selected page
   useEffect(() => {
@@ -207,7 +242,7 @@ export function AnalyticsDashboard({ initialDomains, userEmail, userName, userIm
       }
     }
     loadTimeSeries();
-  }, [selectedDomainId, selectedPage, websiteInterval]);
+  }, [selectedDomainId, selectedPage, websiteInterval, refreshTrigger]);
 
   const handleAddDomain = async (domainName: string) => {
     try {
