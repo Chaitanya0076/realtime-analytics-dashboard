@@ -41,6 +41,14 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
 };
 
 export function TopPagesBarChart({ data, timeInterval, onTimeIntervalChange, isLoading }: TopPagesBarChartProps) {
+  // Create unique display labels combining url and website for clarity
+  const chartData = data.map((item, index) => ({
+    ...item,
+    // Create a unique key for display that includes shortened website
+    displayLabel: item.url,
+    uniqueKey: `${item.url}-${index}`, // Ensure unique keys for React
+  }));
+
   const truncateUrl = (url: string, maxLength: number = 30) => {
     if (url.length <= maxLength) return url;
     return url.substring(0, maxLength) + '...';
@@ -67,7 +75,7 @@ export function TopPagesBarChart({ data, timeInterval, onTimeIntervalChange, isL
         <TimeIntervalSelector selected={timeInterval} onChange={onTimeIntervalChange} />
       </div>
 
-      {data.length === 0 ? (
+      {chartData.length === 0 ? (
         <div className="flex items-center justify-center h-80">
           <p className="text-gray-500">No data available</p>
         </div>
@@ -75,12 +83,12 @@ export function TopPagesBarChart({ data, timeInterval, onTimeIntervalChange, isL
         <div style={{ height: '320px' }} className="[&_svg]:outline-none [&_*]:outline-none">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              data={data}
+              data={chartData}
               margin={{ top: 10, right: 30, left: 20, bottom: 80 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis
-                dataKey="url"
+                dataKey="displayLabel"
                 angle={-45}
                 textAnchor="end"
                 height={80}

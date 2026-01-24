@@ -92,8 +92,12 @@ export async function getTopPagesLastNMinutes(domainId: string, minutes: number)
     pageCounts[path] = (pageCounts[path] || 0) + count;
   }
 
+  // Sort by count DESC, then by path ASC for stable ordering
   return Object.entries(pageCounts)
-    .sort((a, b) => b[1] - a[1]);
+    .sort((a, b) => {
+      if (b[1] !== a[1]) return b[1] - a[1]; // Primary: count descending
+      return a[0].localeCompare(b[0]); // Secondary: path ascending (stable)
+    });
 }
 
 // Optimized: Use MGET to batch fetch all keys at once
@@ -158,8 +162,12 @@ export async function getTopPagesLastNHours(domainId: string, hours: number) {
     pageCounts[path] = (pageCounts[path] || 0) + count;
   }
 
+  // Sort by count DESC, then by path ASC for stable ordering
   return Object.entries(pageCounts)
-    .sort((a, b) => b[1] - a[1]);
+    .sort((a, b) => {
+      if (b[1] !== a[1]) return b[1] - a[1]; // Primary: count descending
+      return a[0].localeCompare(b[0]); // Secondary: path ascending (stable)
+    });
 }
 
 // Optimized: Use MGET to batch fetch all keys at once

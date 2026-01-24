@@ -116,8 +116,14 @@ export function AnalyticsDashboard({ initialDomains, userEmail, userName, userIm
           }
         }
 
-        // Sort and take top 10
-        allPages.sort((a, b) => b.views - a.views);
+        // Sort by views DESC, then by website+url for stable ordering
+        allPages.sort((a, b) => {
+          if (b.views !== a.views) return b.views - a.views; // Primary: views descending
+          // Secondary: website + url for stable ordering
+          const aKey = `${a.website}${a.url}`;
+          const bKey = `${b.website}${b.url}`;
+          return aKey.localeCompare(bKey);
+        });
         setTopPagesData(allPages.slice(0, 10));
       } catch (error) {
         console.error('Failed to load top pages:', error);
