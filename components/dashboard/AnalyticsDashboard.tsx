@@ -21,8 +21,8 @@ import {
   type Domain,
 } from '@/lib/analyticsClient';
 
-// Auto-refresh interval in milliseconds (15 seconds)
-const AUTO_REFRESH_INTERVAL = 15000;
+// Auto-refresh interval in milliseconds (45 seconds)
+const AUTO_REFRESH_INTERVAL = 45000;
 // Initial delay to allow page view event to be processed (1.5 seconds)
 const INITIAL_FETCH_DELAY = 1500;
 
