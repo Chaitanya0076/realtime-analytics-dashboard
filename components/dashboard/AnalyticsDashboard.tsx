@@ -56,6 +56,7 @@ export function AnalyticsDashboard({ initialDomains, userEmail, userName, userIm
   const [isLoadingOverview, setIsLoadingOverview] = useState(true);
   const [isLoadingTopPages, setIsLoadingTopPages] = useState(false);
   const [isLoadingWebsitePages, setIsLoadingWebsitePages] = useState(false);
+  const [isLoadingTimeSeries, setIsLoadingTimeSeries] = useState(false);
 
   // Set initial selected domain
   useEffect(() => {
@@ -163,6 +164,7 @@ export function AnalyticsDashboard({ initialDomains, userEmail, userName, userIm
       }
 
       try {
+        setIsLoadingTimeSeries(true);
         const range = intervalToRange(websiteInterval);
         // Use the path directly (it should already be in the format like "/home" or "/products")
         const pagePath = selectedPage.url.startsWith('/') ? selectedPage.url : `/${selectedPage.url}`;
@@ -194,6 +196,8 @@ export function AnalyticsDashboard({ initialDomains, userEmail, userName, userIm
       } catch (error) {
         console.error('Failed to load time series:', error);
         setTimeSeriesData([]);
+      } finally {
+        setIsLoadingTimeSeries(false);
       }
     }
     loadTimeSeries();
@@ -344,6 +348,7 @@ export function AnalyticsDashboard({ initialDomains, userEmail, userName, userIm
                 totalViews={selectedPage.views}
                 avgViewsPerInterval={avgViews}
                 peakTime={peakTime}
+                isLoading={isLoadingTimeSeries}
               />
             </div>
           )}

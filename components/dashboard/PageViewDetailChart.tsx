@@ -18,6 +18,7 @@ interface PageViewDetailChartProps {
   totalViews: number;
   avgViewsPerInterval: number;
   peakTime: string;
+  isLoading?: boolean;
 }
 
 interface TooltipProps {
@@ -50,6 +51,7 @@ export function PageViewDetailChart({
   totalViews,
   avgViewsPerInterval,
   peakTime,
+  isLoading = false,
 }: PageViewDetailChartProps) {
   const getTimeLabel = () => {
     switch (timeInterval) {
@@ -73,7 +75,14 @@ export function PageViewDetailChart({
         <p className="text-sm text-gray-500 mt-1">{getTimeLabel()}</p>
       </div>
 
-      {data.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center h-80 mb-6">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div>
+            <p className="text-gray-500">Loading analytics data...</p>
+          </div>
+        </div>
+      ) : data.length === 0 ? (
         <div className="flex items-center justify-center h-80 mb-6">
           <p className="text-gray-500">No time series data available</p>
         </div>
