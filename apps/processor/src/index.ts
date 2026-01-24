@@ -10,13 +10,12 @@ import { flushToDb } from "./dbWriter.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Determine if we're in development or production (compiled)
-// In development: __dirname = apps/processor/src
-// In production (compiled): __dirname = apps/processor/dist
-const isCompiled = __dirname.includes('dist');
-const projectRoot = isCompiled 
-  ? resolve(__dirname, '../../..')  // dist -> processor -> apps -> root
-  : resolve(__dirname, '../../../..'); // src -> processor -> apps -> root
+// Determine project root - both src and dist are at the same depth:
+// apps/processor/src -> apps/processor -> apps -> root (3 levels up)
+// apps/processor/dist -> apps/processor -> apps -> root (3 levels up)
+const projectRoot = resolve(__dirname, '../../..');
+console.log('[processor] __dirname:', __dirname);
+console.log('[processor] Project root:', projectRoot);
 
 // Load .env from project root
 // Use override: true to ensure .env file values take precedence over PM2/system env vars

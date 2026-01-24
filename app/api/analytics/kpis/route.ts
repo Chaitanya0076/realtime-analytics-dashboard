@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireDomainAccess } from "@/lib/requireDomainAccess";
 import prisma from "@/lib/prisma";
-import { getLastNMinutesViews } from "@/lib/redisAnalytics";
+import { getLastNHoursViews, getLastNMinutesViews } from "@/lib/redisAnalytics";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -18,43 +18,24 @@ export async function GET(req: Request) {
 
   // Redis (last 30 minutes)
   const last30Min = await getLastNMinutesViews(domainId, 30);
+  // Redis (last 24 hours)
+  const last24Hours = await getLastNHoursViews(domainId, 24);
+  // Redis (last 7 days)
+  const last7Days = await getLastNHoursViews(domainId, 24 * 7);
 
-  // DB queries
-  const now = new Date();
-
-  const [last24Hours, last7Days, totalViews] = await Promise.all([
-    prisma.analytics.aggregate({
-      _sum: { count: true },
-      where: {
-        domainId,
-        granularity: "HOUR",
-        bucket: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
-        path: "", // empty string represents domain-level aggregates
-      },
-    }),
-    prisma.analytics.aggregate({
-      _sum: { count: true },
-      where: {
-        domainId,
-        granularity: "HOUR",
-        bucket: { gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) },
-        path: "", // empty string represents domain-level aggregates
-      },
-    }),
-    prisma.analytics.aggregate({
+  const totalViews = await prisma.analytics.aggregate({
       _sum: { count: true },
       where: {
         domainId,
         granularity: "HOUR", // Use HOUR granularity to avoid double counting with MINUTE
         path: "", // empty string represents domain-level aggregates
       },
-    }),
-  ]);
+    });
 
   return NextResponse.json({
     totalViews: totalViews._sum.count ?? 0,
     last30Min,
-    last24Hours: last24Hours._sum.count ?? 0,
-    last7Days: last7Days._sum.count ?? 0,
+    last24Hours,
+    last7Days,
   });
 }

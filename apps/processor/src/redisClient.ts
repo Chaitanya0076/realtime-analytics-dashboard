@@ -7,14 +7,15 @@ import { dirname, resolve } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Determine if we're in development or production (compiled)
-const isCompiled = __dirname.includes('dist');
-const projectRoot = isCompiled 
-  ? resolve(__dirname, '../../..')  // dist -> processor -> apps -> root
-  : resolve(__dirname, '../../../..'); // src -> processor -> apps -> root
+// Determine project root - both src and dist are at the same depth:
+// apps/processor/src -> apps/processor -> apps -> root (3 levels up)
+// apps/processor/dist -> apps/processor -> apps -> root (3 levels up)
+const projectRoot = resolve(__dirname, '../../..');
 
 // Load .env from project root
-config({ path: resolve(projectRoot, '.env') });
+const envPath = resolve(projectRoot, '.env');
+console.log('[redisClient] Loading .env from:', envPath);
+config({ path: envPath });
 
 // Initialize Redis client with connection options
 // Support both REDIS_URL (connection string) and REDIS_HOST/REDIS_PORT
@@ -68,6 +69,10 @@ process.on('SIGTERM', () => {
 
 export { redis };
 
+function encodePath(path: string): string {
+  return encodeURIComponent(path);
+}
+
 export function domainMinuteKey(domainId: string, bucket: string): string {
     return `analytics:domain:${domainId}:minute:${bucket}`;
 }
@@ -77,9 +82,9 @@ export function domainHourKey(domainId: string, bucket: string): string {
 }
 
 export function pathMinuteKey(domainId: string, path: string, bucket: string): string {
-    return `analytics:domain:${domainId}:path:${path}:minute:${bucket}`;
+    return `analytics:domain:${domainId}:path:${encodePath(path)}:minute:${bucket}`;
 }
 
 export function pathHourKey(domainId: string, path: string, bucket: string): string {
-    return `analytics:domain:${domainId}:path:${path}:hour:${bucket}`;
+    return `analytics:domain:${domainId}:path:${encodePath(path)}:hour:${bucket}`;
 }

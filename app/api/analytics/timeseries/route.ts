@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { requireDomainAccess } from "@/lib/requireDomainAccess";
 import prisma from "@/lib/prisma";
+import { getHourSeries, getMinuteSeries } from "@/lib/redisAnalytics";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const domainId = searchParams.get("domainId");
   const range = searchParams.get("range") || "30m";
-  const path = searchParams.get("path"); // Optional: filter by specific path
+  const path = searchParams.get("path") || undefined; // Optional: filter by specific path
 
   if (!domainId) {
     return NextResponse.json(
@@ -22,6 +23,30 @@ export async function GET(req: Request) {
   let granularity: "MINUTE" | "HOUR";
 
   if (range === "30m") {
+    const points = await getMinuteSeries(domainId, 30, path);
+    return NextResponse.json({
+      granularity: "MINUTE",
+      points,
+    });
+  }
+
+  if (range === "24h") {
+    const points = await getHourSeries(domainId, 24, path);
+    return NextResponse.json({
+      granularity: "HOUR",
+      points,
+    });
+  }
+
+  if (range === "7d") {
+    const points = await getHourSeries(domainId, 24 * 7, path);
+    return NextResponse.json({
+      granularity: "HOUR",
+      points,
+    });
+  }
+
+  if (range === "30m") {
     from = new Date(now.getTime() - 30 * 60 * 1000);
     granularity = "MINUTE";
   } else if (range === "24h") {
@@ -31,6 +56,8 @@ export async function GET(req: Request) {
     from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     granularity = "HOUR";
   }
+
+  console.log("Fetching time series charts from DB", { domainId, range, path });
 
   // Build where clause - if path is provided, filter by it; otherwise use domain-level aggregates
   const whereClause: {

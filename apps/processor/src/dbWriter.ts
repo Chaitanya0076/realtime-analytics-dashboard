@@ -8,14 +8,22 @@ import { dirname, resolve } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Determine if we're in development or production (compiled)
-const isCompiled = __dirname.includes('dist');
-const projectRoot = isCompiled 
-  ? resolve(__dirname, '../../..')  // dist -> processor -> apps -> root
-  : resolve(__dirname, '../../../..'); // src -> processor -> apps -> root
+// Determine project root - both src and dist are at the same depth:
+// apps/processor/src -> apps/processor -> apps -> root (3 levels up)
+// apps/processor/dist -> apps/processor -> apps -> root (3 levels up)
+const projectRoot = resolve(__dirname, '../../..');
+
+// Debug: log paths to help diagnose issues
+console.log('[dbWriter] __dirname:', __dirname);
+console.log('[dbWriter] Project root:', projectRoot);
 
 // Load .env from project root
-config({ path: resolve(projectRoot, '.env') });
+const envPath = resolve(projectRoot, '.env');
+console.log('[dbWriter] Loading .env from:', envPath);
+const envResult = config({ path: envPath });
+if (envResult.error) {
+  console.warn('[dbWriter] Warning loading .env:', envResult.error.message);
+}
 
 // Import Prisma types and client using a simple relative path
 // We'll use the generated Prisma client from the project root
@@ -111,6 +119,9 @@ function toGranularityEnum(granularity: "minute" | "hour"): Granularity {
   return granularity.toUpperCase() as Granularity;
 }
 
+// Batch size for parallel upserts to avoid overwhelming the DB connection pool
+const BATCH_SIZE = 20;
+
 export async function flushToDb(updates: AggregateUpdate[]): Promise<void> {
   if (updates.length === 0) {
     return;
@@ -119,27 +130,35 @@ export async function flushToDb(updates: AggregateUpdate[]): Promise<void> {
   try {
     const client = await prismaPromise;
     
-    for (const u of updates) {
-      await client.analytics.upsert({
-        where: {
-          domainId_bucket_granularity_path: {
-            domainId: u.domainId,
-            bucket: u.bucket,
-            granularity: toGranularityEnum(u.granularity),
-            path: u.path,
-          },
-        },
-        update: {
-          count: { increment: u.count },
-        },
-        create: {
-          domainId: u.domainId,
-          bucket: u.bucket,
-          granularity: toGranularityEnum(u.granularity),
-          path: u.path,
-          count: u.count,
-        },
-      });
+    // Process updates in parallel batches for better performance
+    // This reduces N sequential round-trips to ceil(N/BATCH_SIZE) parallel batches
+    for (let i = 0; i < updates.length; i += BATCH_SIZE) {
+      const batch = updates.slice(i, i + BATCH_SIZE);
+      
+      await Promise.all(
+        batch.map((u) =>
+          client.analytics.upsert({
+            where: {
+              domainId_bucket_granularity_path: {
+                domainId: u.domainId,
+                bucket: u.bucket,
+                granularity: toGranularityEnum(u.granularity),
+                path: u.path,
+              },
+            },
+            update: {
+              count: { increment: u.count },
+            },
+            create: {
+              domainId: u.domainId,
+              bucket: u.bucket,
+              granularity: toGranularityEnum(u.granularity),
+              path: u.path,
+              count: u.count,
+            },
+          })
+        )
+      );
     }
   } catch (error) {
     console.error('[dbWriter] Error flushing to database:', error);
