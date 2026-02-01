@@ -3,7 +3,7 @@
 A modern, real-time web analytics platform that tracks page views, provides detailed insights, and offers a beautiful dashboard for monitoring website performance. Built with Next.js, TypeScript, and a scalable event-driven architecture.
 
 🔗 **Live Demo**: [analyticspro.devwithease.com](https://analyticspro.devwithease.com)  
-📦 **Repository**: [github.com/Chaitanya0076/realtime-analytics-dashboard](https://github.com/Chaitanya0076/realtime-analytics-dashboard)
+📦 **Repository**: [github.com/Chaitanya0076/realtime-analytics-dashboard](https://github.com/Chaitanya0076/realtime-analytics-dashboard)<br/>
 ▶️ **Video**: [Watch the Video](https://drive.google.com/file/d/17SUNo9_AaJzRj1aj6BPXDRMTarSdfvrb/view?usp=drive_link)
 
 ## ✨ Features
