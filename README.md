@@ -4,6 +4,7 @@ A modern, real-time web analytics platform that tracks page views, provides deta
 
 🔗 **Live Demo**: [analyticspro.devwithease.com](https://analyticspro.devwithease.com)  
 📦 **Repository**: [github.com/Chaitanya0076/realtime-analytics-dashboard](https://github.com/Chaitanya0076/realtime-analytics-dashboard)
+▶️ **Video**: [Watch the Video](https://drive.google.com/file/d/17SUNo9_AaJzRj1aj6BPXDRMTarSdfvrb/view?usp=drive_link)
 
 ## ✨ Features
 
